@@ -1,22 +1,16 @@
-import pygame
-from settings import * # Dictionary for Pokemon-style element colors
-ELEMENT_COLORS = {
-    'fire': '#FF4422',
-    'water': '#3399FF',
-    'plant': '#77CC55',
-}
+from settings import * 
 
 class UI:
     def __init__(self, monster, player_monsters, simple_surfs, get_input):
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font(None, 30)
-        self.left = WINDOW_WIDTH / 2 - 100
+        self.left = WINDOW_WIDTH / 2 - 100 
         self.top = WINDOW_HEIGHT / 2 + 50
         self.monster = monster
         self.simple_surfs = simple_surfs
         self.get_input = get_input
 
-        # control
+        # control 
         self.general_options = ['attack', 'heal', 'switch', 'escape']
         self.general_index = {'col': 0, 'row': 0}
         self.attack_index = {'col': 0, 'row': 0}
@@ -26,17 +20,6 @@ class UI:
         self.player_monsters = player_monsters
         self.available_monsters = [monster for monster in self.player_monsters if monster != self.monster and monster.health > 0]
         self.switch_index = 0
-
-        # --- NEW: LOAD ELEMENT ICONS ---
-        self.icon_surfs = {}
-        for element in ['fire', 'water', 'plant']:
-            path = f'mbg_pedia/images/icons/{element}.png'
-            try:
-                surf = pygame.image.load(path).convert_alpha()
-                # Scale to fit nicely next to name (roughly 26x26)
-                self.icon_surfs[element] = pygame.transform.scale(surf, (26, 26))
-            except:
-                self.icon_surfs[element] = None
 
     def input(self):
         keys = pygame.key.get_just_pressed()
@@ -57,7 +40,7 @@ class UI:
         elif self.state == 'switch':
             if self.available_monsters:
                 self.switch_index = (self.switch_index + int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])) % len(self.available_monsters)
-               
+                
                 if keys[pygame.K_SPACE]:
                     self.get_input(self.state, self.available_monsters[self.switch_index])
                     self.state = 'general'
@@ -65,10 +48,10 @@ class UI:
         elif self.state == 'heal':
             self.get_input('heal')
             self.state = 'general'
-       
+        
         elif self.state == 'escape':
             self.get_input('escape')
-       
+        
         if keys[pygame.K_ESCAPE]:
             self.state = 'general'
             self.general_index = {'col': 0, 'row': 0}
@@ -81,36 +64,15 @@ class UI:
         pygame.draw.rect(self.display_surface, COLORS['white'],rect, 0, 4)
         pygame.draw.rect(self.display_surface, COLORS['gray'],rect, 4, 4)
 
-        # menu
+        # menu 
         for col in range(self.cols):
             for row in range(self.rows):
                 x = rect.left + rect.width / (self.cols * 2) + (rect.width / self.cols) * col
                 y = rect.top + rect.height / (self.rows * 2) + (rect.height / self.rows) * row
                 i = col + 2 * row
-               
-                selected = col == index['col'] and row == index['row']
-               
-                # --- COLOR LOGIC FOR ATTACKS ---
-                if self.state == 'attack':
-                    move_name = options[i]
-                    move_element = ABILITIES_DATA[move_name]['element']
-                    bg_color = ELEMENT_COLORS.get(move_element, COLORS['black'])
-                    text_color = COLORS['white']
-                else:
-                    bg_color = COLORS['white']
-                    text_color = COLORS['black']
+                color = COLORS['gray'] if col == index['col'] and row == index['row'] else COLORS['black']
 
-                # Draw move box background
-                if self.state == 'attack':
-                    button_rect = pygame.Rect(0,0, (rect.width / self.cols) - 10, (rect.height / self.rows) - 10)
-                    button_rect.center = (x,y)
-                    pygame.draw.rect(self.display_surface, bg_color, button_rect, 0, 4)
-                    if selected: # Draw highlight border
-                        pygame.draw.rect(self.display_surface, 'yellow', button_rect, 3, 4)
-               
-                # Draw text
-                final_text_color = COLORS['gray'] if (selected and self.state != 'attack') else text_color
-                text_surf = self.font.render(options[i].upper(), True, final_text_color)
+                text_surf = self.font.render(options[i], True, color)
                 text_rect = text_surf.get_frect(center = (x,y))
                 self.display_surface.blit(text_surf, text_rect)
 
@@ -120,7 +82,7 @@ class UI:
         pygame.draw.rect(self.display_surface, COLORS['white'],rect, 0, 4)
         pygame.draw.rect(self.display_surface, COLORS['gray'],rect, 4, 4)
 
-        # menu
+        # menu 
         v_offset = 0 if self.switch_index < self.visible_monsters else -(self.switch_index - self.visible_monsters + 1) * rect.height / self.visible_monsters
         for i in range(len(self.available_monsters)):
             x = rect.centerx
@@ -138,30 +100,24 @@ class UI:
                 self.display_surface.blit(simple_surf, simple_rect)
 
     def stats(self):
-        # bg
-        rect = pygame.FRect(self.left, self.top, 280, 90)
+        # bg 
+        rect = pygame.FRect(self.left, self.top, 250, 80)
         pygame.draw.rect(self.display_surface, COLORS['white'],rect, 0, 4)
         pygame.draw.rect(self.display_surface, COLORS['gray'],rect, 4, 4)
 
-        # Name
+        # data 
         name_surf = self.font.render(self.monster.name, True, COLORS['black'])
         name_rect = name_surf.get_frect(topleft = rect.topleft + pygame.Vector2(rect.width * 0.05, 12))
         self.display_surface.blit(name_surf, name_rect)
 
-        # --- NEW: PLAYER ELEMENT ICON INSTEAD OF BADGE ---
-        icon_surf = self.icon_surfs.get(self.monster.element)
-        if icon_surf:
-            icon_rect = icon_surf.get_frect(midleft = name_rect.midright + pygame.Vector2(10, 0))
-            self.display_surface.blit(icon_surf, icon_rect)
-
-        # health bar
-        health_rect = pygame.FRect(name_rect.left, name_rect.bottom + 15, rect.width * 0.9, 20)
+        # health bar 
+        health_rect = pygame.FRect(name_rect.left, name_rect.bottom + 10, rect.width * 0.9, 20)
         pygame.draw.rect(self.display_surface, COLORS['gray'], health_rect)
         self.draw_bar(health_rect, self.monster.health, self.monster.max_health)
-   
+    
     def draw_bar(self, rect, value, max_value):
         ratio = rect.width / max_value
-        progress_rect = pygame.FRect(rect.topleft, (max(0, value * ratio), rect.height))
+        progress_rect = pygame.FRect(rect.topleft, (value * ratio,rect.height))
         pygame.draw.rect(self.display_surface, COLORS['red'], progress_rect)
 
     def update(self):
@@ -173,7 +129,7 @@ class UI:
             case 'general': self.quad_select(self.general_index, self.general_options)
             case 'attack': self.quad_select(self.attack_index, self.monster.abilities)
             case 'switch': self.switch()
-       
+        
         if self.state != 'switch':
             self.stats()
 
@@ -181,39 +137,20 @@ class OpponentUI:
     def __init__(self, monster):
         self.display_surface = pygame.display.get_surface()
         self.monster = monster
-        self.font = pygame.font.Font(None, 26)
-
-        # --- NEW: LOAD ELEMENT ICONS FOR OPPONENT ---
-        self.icon_surfs = {}
-        for element in ['fire', 'water', 'plant']:
-            path = f'mbg_pedia/images/icons/{element}.png'
-            try:
-                surf = pygame.image.load(path).convert_alpha()
-                self.icon_surfs[element] = pygame.transform.scale(surf, (26, 26))
-            except:
-                self.icon_surfs[element] = None
+        self.font = pygame.font.Font(None, 30)
 
     def draw(self):
-        # Main Box
-        rect = pygame.FRect((0,0), (280,90)).move_to(midleft = (550, self.monster.rect.centery))
+
+        rect = pygame.FRect((0,0), (250,80)).move_to(midleft = (500, self.monster.rect.centery))
         pygame.draw.rect(self.display_surface, COLORS['white'],rect, 0, 4)
         pygame.draw.rect(self.display_surface, COLORS['gray'],rect, 4, 4)
 
-        # Name
         name_surf = self.font.render(self.monster.name, True, COLORS['black'])
         name_rect = name_surf.get_frect(topleft = rect.topleft + pygame.Vector2(rect.width * 0.05, 12))
         self.display_surface.blit(name_surf, name_rect)
 
-        # --- NEW: OPPONENT ELEMENT ICON INSTEAD OF BADGE ---
-        icon_surf = self.icon_surfs.get(self.monster.element)
-        if icon_surf:
-            icon_rect = icon_surf.get_frect(midleft = name_rect.midright + pygame.Vector2(10, 0))
-            self.display_surface.blit(icon_surf, icon_rect)
-
-        # Health bar
-        health_rect = pygame.FRect(name_rect.left, name_rect.bottom + 15, rect.width * 0.9, 20)
+        health_rect = pygame.FRect(name_rect.left, name_rect.bottom + 10, rect.width * 0.9, 20)
         ratio = health_rect.width / self.monster.max_health
-        progress_rect = pygame.FRect(health_rect.topleft, (max(0, self.monster.health * ratio), health_rect.height))
-       
+        progress_rect = pygame.FRect(health_rect.topleft, (self.monster.health * ratio, health_rect.height))
         pygame.draw.rect(self.display_surface, COLORS['gray'], health_rect)
         pygame.draw.rect(self.display_surface, COLORS['red'], progress_rect)
