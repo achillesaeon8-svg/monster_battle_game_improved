@@ -20,10 +20,12 @@ from random import choice
 from ui import *
 from attack import AttackAnimationSprite
 
+window_width, window_height = 1280, 720
+
 class Game:
     def __init__(self):
         pygame.init()
-        self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.display_surface = pygame.display.set_mode((window_width, window_height))
         pygame.display.set_caption('Monster Battle')
         self.clock = pygame.time.Clock()
         self.running = True
@@ -106,7 +108,7 @@ class Game:
             timer.update()
 
     def import_assets(self):
-        current_folder = 'MBGpedia'
+        current_folder = 'mbg_pedia'
         self.back_surfs = folder_importer(current_folder, 'images', 'front')
         self.front_surfs = folder_importer(current_folder, 'images', 'reverse')
         self.bg_surfs = folder_importer(current_folder, 'images', 'other')
