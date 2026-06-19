@@ -6,7 +6,17 @@ from random import choice
 from ui import *
 from attack import AttackAnimationSprite
 import pygame, sys
+import os  # <-- Added os module to handle path resolution
 from button import Button
+
+# =========================================================================
+# FORCE WORKING DIRECTORY TO FIX PYGAME LOAD ERRORS PERMANENTLY
+# =========================================================================
+# This calculates exactly where this main.py file is sitting on your drive
+GAME_DIR = os.path.dirname(os.path.abspath(__file__))
+# This tells Python to step directly into that folder to look for everything
+os.chdir(GAME_DIR)
+# =========================================================================
 
 def get_font(size):
     return pygame.font.Font(None, size)
@@ -17,10 +27,10 @@ class Game:
         self.display_surface = pygame.display.set_mode((1280, 720))
         pygame.display.set_caption("Monster Battle")
         self.clock = pygame.time.Clock()
-       
+        
         raw_bg = pygame.image.load('mbg_pedia/images/game_menu/gmb_pic.png')
         self.menu_bg = pygame.transform.scale(raw_bg, (1280, 720))
-       
+        
         self.import_assets()
 
         player_monster_list = ['Blazedillo', 'Seagon', 'Gengharoo', 'Bermudrac', 'Dragoshell', 'Lustar']
@@ -43,7 +53,6 @@ class Game:
         overlay.set_alpha(245)
         overlay.fill((10, 10, 15))
 
-
         temp_ui = UI(self.monster, self.player_monsters, self.simple_surfs, self.get_input)
 
         left_anchor = 120  
@@ -55,13 +64,12 @@ class Game:
             self.display_surface.blit(self.menu_bg, (0, 0))
             self.display_surface.blit(overlay, (0,0))
 
-
             title_surf = get_font(70).render('MONSTER ELEMENT GUIDE', True, "#ffd47e")
             self.display_surface.blit(title_surf, (center_screen - title_surf.get_width()//2, 40))
 
             y_ptr = 150
             h_font = get_font(35)
-           
+            
             self.display_surface.blit(h_font.render("MOVE", True, '#d7fcd4'), (left_anchor, y_ptr))
             type_h = h_font.render("TYPE", True, '#d7fcd4')
             self.display_surface.blit(type_h, (center_screen - type_h.get_width()//2, y_ptr))
@@ -72,7 +80,7 @@ class Game:
             for move, data in ABILITIES_DATA.items():
                 icon = temp_ui.icon_surfs.get(data['element'])
                 if icon: self.display_surface.blit(icon, (left_anchor - 45, y_ptr))
-               
+                
                 m_color = ELEMENT_COLORS.get(data['element'], 'white')
                 m_surf = get_font(30).render(move.upper(), True, m_color)
                 self.display_surface.blit(m_surf, (left_anchor + 15, y_ptr))
@@ -86,16 +94,15 @@ class Game:
 
             chart_y = 500
             elemental_colors = [center_screen - 240, center_screen, center_screen + 240]
-           
+            
             v_heads = ["VS WATER", "VS PLANT", "VS FIRE"]
             for i, vh in enumerate(v_heads):
                 vh_s = get_font(28).render(vh, True, '#AAAAAA')
                 self.display_surface.blit(vh_s, (elemental_colors[i] - vh_s.get_width()//2, chart_y))
 
-
             for row_idx, attacker in enumerate(['fire', 'water', 'plant']):
                 row_y = chart_y + 50 + (row_idx * 45)
-               
+                
                 l_color = ELEMENT_COLORS[attacker]
                 l_surf = get_font(32).render(f"{attacker.upper()}:", True, l_color)
                 self.display_surface.blit(l_surf, (left_anchor + 15, row_y))
@@ -131,7 +138,7 @@ class Game:
         while True:
             self.display_surface.blit(self.menu_bg, (0, 0))
             m_pos = pygame.mouse.get_pos()
-           
+            
             title = get_font(100).render('MONSTER BATTLE', True, '#b68f40')
             self.display_surface.blit(title, (640 - title.get_width()//2, 100))
 
@@ -141,7 +148,7 @@ class Game:
                               font=get_font(50), base_color='White', hovering_color='Yellow')
             quit_btn = Button(image=quit_img, pos=(640, 560), text_input='QUIT GAME',
                               font=get_font(50), base_color='White', hovering_color='Yellow')
-               
+                
             for btn in [play_btn, help_btn, quit_btn]:
                 btn.change_color(m_pos)
                 btn.update(self.display_surface)
@@ -167,12 +174,12 @@ class Game:
             m.health = m.max_health
         self.monster = self.player_monsters[0]
         self.all_sprites.add(self.monster)
-       
+        
         opp_name = choice(list(MONSTER_DATA.keys()))
         self.opponent = Opponent(opp_name, self.front_surfs[opp_name], self.all_sprites)
         self.ui = UI(self.monster, self.player_monsters, self.simple_surfs, self.get_input)
         self.opponent_ui = OpponentUI(self.opponent)
-       
+        
         self.player_active = True
         self.timers = {
             'player end': Timer(1000, func=self.opponent_turn),
@@ -193,7 +200,7 @@ class Game:
         elif state == 'escape':
             if 'music' in self.audio: self.audio['music'].stop()
             self.running = False
-       
+        
         if self.running:
             self.player_active = False
             self.timers['player end'].activate()
